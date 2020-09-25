@@ -1,0 +1,72 @@
+
+<launch>
+  
+
+
+    <arg name="scan_20_hz"    default="false"/> <!-- If we launch the velodyne with "rpm:=1200" argument -->
+    <arg name="use_sim_time"  default="true"/>
+    <param if="$(arg use_sim_time)" name="use_sim_time" value="true"/>
+    
+    <arg name="frame_id" default="bobcat_base"/>
+    <arg name="odom_topic" default="/odom"/>
+
+
+
+      <node pkg="rtabmap_ros" type="rtabmap" name="rtabmap" output="screen" args="-d">	  
+        <param name="frame_id"             type="string" value="$(arg frame_id)"/>  
+        <param name="subscribe_depth"      type="bool" value="false"/>
+        <param name="subscribe_rgb"        type="bool" value="false"/>
+        <param name="subscribe_scan_cloud" type="bool" value="true"/>
+        <param name="approx_sync"          type="bool" value="false"/>
+        <param name="map_always_update"    type="bool" value="true"/>
+
+
+        <param name="odom_frame_id"   type="string" value="cartographer_odom"/>
+        
+        <remap from="scan_cloud" to="assembled_cloud"/>
+
+
+
+        <param name="Rtabmap/DetectionRate"          type="string" value="1"/>  
+        <param name="RGBD/NeighborLinkRefining"      type="string" value="false"/>
+        <param name="RGBD/ProximityBySpace"          type="string" value="true"/>
+        <param name="RGBD/ProximityMaxGraphDepth"    type="string" value="0"/>
+        <param name="RGBD/ProximityPathMaxNeighbors" type="string" value="1"/>
+        <param name="RGBD/AngularUpdate"             type="string" value="0.05"/>
+        <param name="RGBD/LinearUpdate"              type="string" value="0.05"/>
+        <param name="Mem/NotLinkedNodesKept"         type="string" value="false"/>
+        <param name="Mem/STMSize"                    type="string" value="30"/>
+
+        <param name="Reg/Strategy"                   type="string" value="1"/> 
+        <param name="Grid/CellSize"                  type="string" value="0.1"/>
+        <param name="Grid/RangeMax"                  type="string" value="20"/>
+        <param name="Grid/ClusterRadius"             type="string" value="1"/>
+        <param name="Grid/GroundIsObstacle"          type="string" value="true"/>
+
+
+        <param name="Icp/VoxelSize"                  type="string" value="0.2"/>
+        <param name="Icp/PointToPlaneK"              type="string" value="20"/>
+        <param name="Icp/PointToPlaneRadius"         type="string" value="0"/>
+        <param name="Icp/PointToPlane"               type="string" value="true"/>
+        <param name="Icp/Iterations"                 type="string" value="10"/>
+        <param name="Icp/Epsilon"                    type="string" value="0.001"/>
+        <param name="Icp/MaxTranslation"             type="string" value="3"/>
+        <param name="Icp/MaxCorrespondenceDistance"  type="string" value="1"/>
+        <param name="Icp/PM"                         type="string" value="true"/> 
+        <param name="Icp/PMOutlierRatio"             type="string" value="0.7"/>
+        <param name="Icp/CorrespondenceRatio"        type="string" value="0.4"/>
+      </node>
+
+
+
+
+      <node pkg="nodelet" type="nodelet" name="point_cloud_assembler" args="standalone rtabmap_ros/point_cloud_assembler" output="screen">
+        <remap from="cloud"           to="/points_fused"/>
+        <remap from="odom"            to="odom"/>
+        <param     if="$(arg scan_20_hz)" name="max_clouds"      type="int"    value="20" />
+        <param unless="$(arg scan_20_hz)" name="max_clouds"      type="int"    value="10" />
+        <param name="fixed_frame_id"  type="string" value="map" />
+      </node>
+
+
+</launch>

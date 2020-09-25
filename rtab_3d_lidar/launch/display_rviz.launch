@@ -1,0 +1,5 @@
+<launch>
+    <!-- launch rviz with custom profile-->
+<node pkg="rviz" type="rviz" name="rviz" args="-d $(find rtab_3d_lidar)/config/rtab.rviz" output="screen"/> 
+
+</launch>

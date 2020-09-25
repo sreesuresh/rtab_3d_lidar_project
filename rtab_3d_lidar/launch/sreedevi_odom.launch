@@ -1,0 +1,42 @@
+<!-- 
+  Sreedevi's additional TF (odometry)
+-->
+
+<launch>
+
+
+	<!-- Publish Odometry TF -->
+	<node pkg="semfire_dataset_ntu" type="subs_odom_publ_tf" name="sub_odom_pub_tf" output="screen">
+		<param name="ignore_child_frame_id" value="false"/>
+	</node>
+
+ <!-- TODO: Sreedevi: add other nodes... -->
+
+	<node pkg="tf" type="static_transform_publisher" name="odom1_broadcaster" args="0 0 0 0 0 0 1 map cartographer_odom 100" />
+
+  <!-- Republish compressed image to raw image -->
+	<node name="republish" type="republish" pkg="image_transport" output="screen" args="compressed in:=/dalsa_camera_720p raw out:=/camera/image_raw" />
+
+
+  <!-- Cropping the pointcloud which is in the view of camera -->
+
+
+  <node pkg="nodelet" type="nodelet" name="crop_box2" args="load pcl/CropBox pcl_manager" output="screen">
+        <remap from="~input" to="front_lslidar_point_cloud" />
+        <remap from="~output" to="crop_cloud" />
+        <rosparam>
+              min_x: 0.5
+              max_x: 100.0
+              min_y: -5.0
+              max_y: 10.0
+              min_z: -10
+              max_z: 30.0
+              keep_organized: true
+              negative: false
+        </rosparam>
+   </node>
+
+
+
+
+</launch>
